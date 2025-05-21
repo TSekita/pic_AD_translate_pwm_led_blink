@@ -1,4 +1,3 @@
-
 // PIC16F18857 Configuration Bit Settings
 
 // 'C' source line config statements
@@ -6,7 +5,7 @@
 // CONFIG1
 #pragma config FEXTOSC = OFF    // External Oscillator mode selection bits (Oscillator not enabled)
 #pragma config RSTOSC = HFINT1  // Power-up default value for COSC bits (HFINTOSC (1MHz))
-#pragma config CLKOUTEN = OFF   // Clock Out Enable bit (CLKOUT function is disabled; i/o or oscillator function on OSC2)
+#pragma config CLKOUTEN = OFF   // Clock Out Enable bit (CLKOUT function is disabled; I/O or oscillator function on OSC2)
 #pragma config CSWEN = ON       // Clock Switch Enable bit (Writing to NOSC and NDIV is allowed)
 #pragma config FCMEN = OFF      // Fail-Safe Clock Monitor Enable bit (FSCM timer disabled)
 
@@ -15,24 +14,24 @@
 #pragma config PWRTE = OFF      // Power-up Timer Enable bit (PWRT disabled)
 #pragma config LPBOREN = OFF    // Low-Power BOR enable bit (ULPBOR disabled)
 #pragma config BOREN = ON       // Brown-out reset enable bits (Brown-out Reset Enabled, SBOREN bit is ignored)
-#pragma config BORV = LO        // Brown-out Reset Voltage Selection (Brown-out Reset Voltage (VBOR) set to 1.9V on LF, and 2.45V on F Devices)
-#pragma config ZCD = OFF        // Zero-cross detect disable (Zero-cross detect circuit is disabled at POR.)
-#pragma config PPS1WAY = ON     // Peripheral Pin Select one-way control (The PPSLOCK bit can be cleared and set only once in software)
-#pragma config STVREN = OFF     // Stack Overflow/Underflow Reset Enable bit (Stack Overflow or Underflow will not cause a reset)
+#pragma config BORV = LO        // Brown-out Reset Voltage Selection (VBOR = 1.9V on LF, 2.45V on F Devices)
+#pragma config ZCD = OFF        // Zero-cross detect disable (Zero-cross detect circuit is disabled at POR)
+#pragma config PPS1WAY = ON     // Peripheral Pin Select one-way control (PPSLOCK can only be cleared and set once)
+#pragma config STVREN = OFF     // Stack Overflow/Underflow Reset Enable bit (Stack Overflow/Underflow does not cause a reset)
 
 // CONFIG3
-#pragma config WDTCPS = WDTCPS_31// WDT Period Select bits (Divider ratio 1:65536; software control of WDTPS)
-#pragma config WDTE = OFF       // WDT operating mode (WDT Disabled, SWDTEN is ignored)
-#pragma config WDTCWS = WDTCWS_7// WDT Window Select bits (window always open (100%); software control; keyed access not required)
+#pragma config WDTCPS = WDTCPS_31// WDT Period Select bits (1:65536 divider; WDTPS controlled by software)
+#pragma config WDTE = OFF       // WDT operating mode (WDT Disabled, SWDTEN ignored)
+#pragma config WDTCWS = WDTCWS_7// WDT Window Select bits (window always open; software control)
 #pragma config WDTCCS = SC      // WDT input clock selector (Software Control)
 
 // CONFIG4
 #pragma config WRT = OFF        // UserNVM self-write protection bits (Write protection off)
-#pragma config SCANE = not_available// Scanner Enable bit (Scanner module is not available for use)
-#pragma config LVP = ON         // Low Voltage Programming Enable bit (Low Voltage programming enabled. MCLR/Vpp pin function is MCLR.)
+#pragma config SCANE = not_available// Scanner Enable bit (Scanner module not available)
+#pragma config LVP = ON         // Low Voltage Programming Enable bit (Low Voltage programming enabled. MCLR/Vpp pin is MCLR)
 
 // CONFIG5
-#pragma config CP = OFF         // UserNVM Program memory code protection bit (Program Memory code protection disabled)
+#pragma config CP = OFF         // UserNVM Program memory code protection bit (Program memory code protection disabled)
 #pragma config CPD = OFF        // DataNVM code protection bit (Data EEPROM code protection disabled)
 
 // #pragma config statements should precede project file includes.
@@ -40,7 +39,7 @@
 
 #include <xc.h>
 
-#define _XTAL_FREQ 1000000 //Internal oscillator Hz
+#define _XTAL_FREQ 1000000 // Internal oscillator frequency in Hz
 
 void ADC_Init(void);
 unsigned int ADC_Read(unsigned char channel);
@@ -52,77 +51,77 @@ void main(void) {
     pwm6_init();
 
     while (1) {
-        unsigned int adcVal = ADC_Read(0); // AN0からADC読み取り
-        pwm6_set_duty(adcVal);              // PWMに反映
+        unsigned int adcVal = ADC_Read(0); // Read ADC from AN0
+        pwm6_set_duty(adcVal);             // Apply to PWM
         __delay_ms(10);
     }
 }
 
 void ADC_Init(void) {
-    // AN0をアナログ入力に設定
-    TRISAbits.TRISA0 = 1;     // 入力に設定
-    ANSELAbits.ANSA0 = 1;    // アナログ機能を有効
+    // Set AN0 as analog input
+    TRISAbits.TRISA0 = 1;     // Set as input
+    ANSELAbits.ANSA0 = 1;     // Enable analog function
 
-    // ADCON1設定：クロックソースと基準電圧
-    ADCON0bits.ADFRM0 = 1;    // 右詰め（10bit）
-    ADCLKbits.ADCCS = 0x3F; // ADCクロック = Fosc/64
-    ADREFbits.ADNREF = 0;  // 負基準 = Vss
-    ADREFbits.ADPREF = 0b00; // 正基準 = Vdd
+    // Set ADCON1: clock source and reference voltage
+    ADCON0bits.ADFRM0 = 1;    // Right justified (10-bit)
+    ADCLKbits.ADCCS = 0x3F;   // ADC clock = Fosc/64
+    ADREFbits.ADNREF = 0;     // Negative reference = Vss
+    ADREFbits.ADPREF = 0b00;  // Positive reference = Vdd
 
-    // 初期チャネル選択（AN0）、ADC無効
-    ADPCHbits.ADPCH = 0b00000; // AN0選択
-    ADCON0bits.ADON = 1;      // ADCモジュールを有効化
+    // Initial channel selection (AN0), ADC enabled
+    ADPCHbits.ADPCH = 0b00000; // Select AN0
+    ADCON0bits.ADON = 1;       // Enable ADC module
 }
 
 unsigned int ADC_Read(unsigned char channel) {
-    // チャネル選択（0～35）
+    // Select channel (0 to 35)
     ADPCHbits.ADPCH = channel;
-    __delay_us(10); // チャネル切替後の安定待ち
+    __delay_us(10); // Wait for channel to stabilize
 
-    ADCON0bits.GO_nDONE = 1; // 変換開始
-    while (ADCON0bits.GO_nDONE); // 完了待ち
+    ADCON0bits.GO_nDONE = 1; // Start conversion
+    while (ADCON0bits.GO_nDONE); // Wait for completion
 
-    // 結果取得（10ビット右詰め）
+    // Get result (10-bit right justified)
     return (unsigned int)((ADRESH << 8) | ADRESL);
 }
 
 void pwm6_init(void)
 {
-     // PWM out pin setting
+    // Set PWM output pin
     TRISAbits.TRISA4 = 0;       // RA4 output
-    ANSELAbits.ANSA4 = 0;       // RA4 digital
-    
-    // PPS setting (PWM6 -> RA4)
-    PPSLOCK = 0x55;             // charm
-    PPSLOCK = 0xAA;             // charm
-    PPSLOCKbits.PPSLOCKED = 0;  // PPS UNLOCKED
+    ANSELAbits.ANSA4 = 0;       // RA4 digital mode
 
-    RA4PPS = 0x0E; // RA4 assign PWM6
+    // PPS setting (PWM6 -> RA4)
+    PPSLOCK = 0x55;             // Unlock sequence step 1
+    PPSLOCK = 0xAA;             // Unlock sequence step 2
+    PPSLOCKbits.PPSLOCKED = 0;  // Unlock PPS
+
+    RA4PPS = 0x0E;              // Assign PWM6 to RA4
     __delay_us(10);
 
-    PPSLOCK = 0x55;             // charm
-    PPSLOCK = 0xAA;             // charm
-    PPSLOCKbits.PPSLOCKED = 1;  // PPS LOCKED
+    PPSLOCK = 0x55;             // Lock sequence step 1
+    PPSLOCK = 0xAA;             // Lock sequence step 2
+    PPSLOCKbits.PPSLOCKED = 1;  // Lock PPS
 
-    // Timer2 setting (PWM clock)
-    PR2 = 0xF9;                 // PWM period setting MAX 255(0xFF)
-    T2CONbits.T2CKPS = 0b000;    // prescaler 1:1
-    T2CLKCONbits.CS = 0b0001;  // FOSC/4 = 1MHz / 4 = 250kHz
-    PIR4bits.TMR2IF = 0;        // clear flag
-    T2CONbits.TMR2ON = 1;       // Timer start
+    // Timer2 setting (PWM clock source)
+    PR2 = 0xF9;                 // PWM period setting (max 255 = 0xFF)
+    T2CONbits.T2CKPS = 0b000;   // Prescaler 1:1
+    T2CLKCONbits.CS = 0b0001;   // Clock source = FOSC/4 = 1MHz / 4 = 250kHz
+    PIR4bits.TMR2IF = 0;        // Clear timer flag
+    T2CONbits.TMR2ON = 1;       // Start Timer2
 
-    while (!PIR4bits.TMR2IF);   // Timer2 waiting for stability
+    while (!PIR4bits.TMR2IF);   // Wait for Timer2 to stabilize
 
-    // PWM6 setting
-    PWM6DCH = 0;                // duty init higher rank
-    PWM6DCL = 0;                // duty init lower rank
-    PWM6CONbits.PWM6POL = 0;    // active high
-    PWM6CONbits.PWM6EN = 1;     // PWM6 enabled
+    // PWM6 setup
+    PWM6DCH = 0;                // Initialize high duty register
+    PWM6DCL = 0;                // Initialize low duty register
+    PWM6CONbits.PWM6POL = 0;    // Active high
+    PWM6CONbits.PWM6EN = 1;     // Enable PWM6
 }
 
 void pwm6_set_duty(uint16_t duty)
 {
     if (duty > 1023) duty = 1023;
-    PWM6DCH = (uint8_t)(duty >> 2);
-    PWM6DCL = (uint8_t)((duty & 0x03) << 6);
+    PWM6DCH = (uint8_t)(duty >> 2);              // High 8 bits
+    PWM6DCL = (uint8_t)((duty & 0x03) << 6);     // Low 2 bits
 }

@@ -64,7 +64,7 @@ void ADC_Init(void) {
 
     // Set ADCON1: clock source and reference voltage
     ADCON0bits.ADFRM0 = 1;    // Right justified (10-bit)
-    ADCLKbits.ADCCS = 0x3F;   // ADC clock = Fosc/64
+    ADCLKbits.ADCCS = 0x3F;   // ADC clock = Fosc/128
     ADREFbits.ADNREF = 0;     // Negative reference = Vss
     ADREFbits.ADPREF = 0b00;  // Positive reference = Vdd
 
@@ -78,8 +78,8 @@ unsigned int ADC_Read(unsigned char channel) {
     ADPCHbits.ADPCH = channel;
     __delay_us(10); // Wait for channel to stabilize
 
-    ADCON0bits.GO_nDONE = 1; // Start conversion
-    while (ADCON0bits.GO_nDONE); // Wait for completion
+    ADCON0bits.ADGO = 1; // Start conversion
+    while (ADCON0bits.ADGO); // Wait for completion
 
     // Get result (10-bit right justified)
     return (unsigned int)((ADRESH << 8) | ADRESL);
